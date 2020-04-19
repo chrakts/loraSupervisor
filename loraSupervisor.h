@@ -18,15 +18,13 @@
 
 #include "Serial.h"
 #include "External.h"
-
+#include "../Secrets/secrets.h"
 #include "Communication.h"
-#include "CmultiBusy.h"
+#include "ComReceiver.h"
+#include "loraCommands.h"
 #include "../xmegaClocks/xmegaClocks.h"
 #include "LoRa.h"
 #include "Cmulti2Buffer.h"
-
-
-
 
 void setup();
 void onTxDone();

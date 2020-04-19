@@ -8,6 +8,7 @@
 #include "SPI.h"
 #include "LoRa.h"
 #include "Cmulti2Buffer.h"
+#include "ComReceiver.h"
 
 extern const char *Node;
 
@@ -18,6 +19,8 @@ extern const char *fehler_text[];
 extern char Compilation_Date[];
 extern char Compilation_Time[];
 
+extern volatile float fExternalTemperature;
+
 extern char SecurityLevel;
 
 extern CRC_Calc crcGlobal;
@@ -27,7 +30,7 @@ extern uint8_t outputPins[];
 extern SPI mySPI;
 
 extern Communication cmulti;
-
+extern ComReceiver cmultiRec;
 class LoRaClass;
 
 extern LoRaClass LoRa;
@@ -37,6 +40,8 @@ extern volatile  uint8_t rxIsReady;
 
 extern volatile int8_t rxRssi;
 extern  String rxMessage;
+
+extern uint8_t key[];
 
 extern char LoraCmultiBuffer[];
 extern Cmulti2Buffer loraCmulti;

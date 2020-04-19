@@ -35,6 +35,7 @@
 					<Add directory="./" />
 					<Add directory="/home/chrak/Daten/Software/repositories/LoRa-for-ATxMega/src" />
 					<Add directory="/home/chrak/Daten/Software/repositories/spi" />
+					<Add directory="/home/chrak/Daten/Software/repositories/ComReceiver" />
 				</Compiler>
 				<Linker>
 					<Add option="-Wl,-u,vfprintf" />
@@ -72,6 +73,7 @@
 					<Add directory="./" />
 					<Add directory="/home/chrak/Daten/Software/repositories/LoRa-for-ATxMega/src" />
 					<Add directory="/home/chrak/Daten/Software/repositories/spi" />
+					<Add directory="/home/chrak/Daten/Software/repositories/ComReceiver" />
 				</Compiler>
 				<Linker>
 					<Add option="-Wl,-u,vfprintf" />
@@ -110,13 +112,15 @@
 		<Unit filename="../Arduino4AtXmega/Stream.h" />
 		<Unit filename="../Arduino4AtXmega/WString.cpp" />
 		<Unit filename="../Arduino4AtXmega/WString.h" />
+		<Unit filename="../ComReceiver/ComReceiver.cpp" />
+		<Unit filename="../ComReceiver/ComReceiver.h" />
 		<Unit filename="../LoRa-for-ATxMega/src/LoRa.cpp" />
 		<Unit filename="../LoRa-for-ATxMega/src/LoRa.h" />
+		<Unit filename="../Secrets/secrets.h" />
 		<Unit filename="../communication/CRC_Calc.cpp" />
 		<Unit filename="../communication/CRC_Calc.h" />
 		<Unit filename="../communication/Cmulti2Buffer.cpp" />
 		<Unit filename="../communication/Cmulti2Buffer.h" />
-		<Unit filename="../communication/CmultiBusy.cpp" />
 		<Unit filename="../communication/CmultiBusy.h" />
 		<Unit filename="../communication/Communication.cpp" />
 		<Unit filename="../communication/Communication.h" />
@@ -133,6 +137,8 @@
 		<Unit filename="Globals.cpp" />
 		<Unit filename="Operators.cpp" />
 		<Unit filename="Operators.h" />
+		<Unit filename="loraCommands.cpp" />
+		<Unit filename="loraCommands.h" />
 		<Unit filename="loraHardware.h" />
 		<Unit filename="loraSupervisor.cpp" />
 		<Unit filename="loraSupervisor.h" />

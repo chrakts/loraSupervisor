@@ -1,4 +1,6 @@
 #include "loraSupervisor.h"
+#include "loraCommands.h"
+
 #ifdef SENDER_BUILT
 #pragma message ( "---------------------- Sender-Version will be build ----------------------" )
 #endif // SENDER_BUILT
@@ -36,19 +38,65 @@ void setup()
 	PORTA_OUT = 0xFF;
 	//init_mytimer();
 
-  initReadMonitor();
-  initBusyCounter();
-
-
 	PMIC_CTRL = PMIC_LOLVLEX_bm | PMIC_HILVLEN_bm | PMIC_MEDLVLEN_bm;
 	sei();
 	cmulti.open(Serial::BAUD_57600,F_CPU);
 
   cmulti.sendInfo("Hello from LORA-Board","BR");
 
+  #ifdef SENDER_BUILT
+
+  cmulti.sendStandard(SECURITY_LEVEL_DEVELOPMENT_KEY,"Kg",'S','0','K','T');
+  _delay_ms(30);
+  cmulti.sendCommand("Kg",'S','0','m');
+  _delay_ms(130);
+  cmulti.sendCommand("Kg",'S','0','C');
+  _delay_ms(130);
+  cmulti.sendCommand("Kg",'S','0','T');
+  _delay_ms(130);
+  cmulti.sendCommand("Kg",'S','0','m');
+  _delay_ms(130);
+  cmulti.sendCommand("Kg",'R','0','n');
+  _delay_ms(130);
+  cmulti.sendCommand("Kg",'R','0','g');
+  _delay_ms(130);
+  cmulti.sendCommand("Kg",'D','0','A');
+  _delay_ms(130);
+
+  /*
+  cmulti.encryptSetKey(key);
+  cmulti.setEncryption();
+  cmulti.broadcastFloat(-5.245,'C','1','T');
+  _delay_ms(30);
+  cmulti.setEncryption();
+  cmulti.sendStandard("56.485,3.45","rx",'T','0','f','T');
+  _delay_ms(130);
+  cmulti.setEncryption();
+  cmulti.sendByteArray(key,16,"rx",'S','T','0','B');
+  _delay_ms(30);
+*/
+  #endif // SENDER_BUILT
+  #ifdef RECEIVER_BUILT
+  cmulti.sendStandard(SECURITY_LEVEL_DEVELOPMENT_KEY,"tx",'S','0','K','T');
+  _delay_ms(30);
+  cmulti.sendCommand("tx",'S','0','C');
+  _delay_ms(30);
+  #endif // RECEIVER_BUILT
+
+
+  #ifdef SENDER_BUILT
+  //cmulti.sendStandard("LORA-Board","rx",'T','0','d','T');
+  #endif // SENDER_BUILT
+  #ifdef RECEIVER_BUILT
+  cmulti.sendStandard("LORA-Board","tx",'T','0','d','T');
+  #endif // RECEIVER_BUILT
+
+
+
   if (!LoRa.begin(868E6))
   {
     //Serial.println("Starting LoRa failed!");
+    //
     LED_ROT_ON;
     while (1);
   }
@@ -77,15 +125,13 @@ int main()
 #ifdef SENDER_BUILT
   while(1)
   {
-
+/*
   // send packet
     LED_BLAU_ON;
     PORTC.OUTCLR = PIN0_bm;
     PORTC.OUTSET = PIN1_bm;
     loraCmulti.sendStandardInt("BR",'S','0','C',counter);
     LoRa_sendMessage(loraCmulti.get());
-    /*cmulti.sendStandardInt("BR",'S','0','C',counter);
-    _delay_ms(5);*/
     while(txIsReady==false)
     {}
     counter++;
@@ -95,14 +141,19 @@ int main()
     sleep_enable();
     sleep_cpu();
     sleep_disable();
-    initReadMonitor();
+    initReadMonitor();*/
+
+    cmultiRec.comStateMachine();
+    cmultiRec.doJob();
   }
 #endif // SENDER_BUILT
 
 
 #ifdef RECEIVER_BUILT
+  uint32_t counter = 0;
   while(1)
   {
+  /*
     while(rxIsReady==false)
     {
       LED_GRUEN_OFF;
@@ -115,7 +166,17 @@ int main()
     rxIsReady=false;
     evaluate();
     _delay_ms(5);
+  */
 
+    cmultiRec.comStateMachine();
+    cmultiRec.doJob();
+
+    if(counter > 1000000)
+    {
+      cmulti.sendAnswerDouble("!!", 'X','X','X',fExternalTemperature,true);
+      counter = 0;
+    }
+    counter++;
   }
 #endif // RECEIVER_BUILT
 
@@ -127,20 +188,27 @@ char target[3],source[3],text[25];
 char func,adr,job;
 uint8_t l;
 
-  strncpy(target,&(rxMessage.c_str()[1]),2);
-  target[2] = '\0';
-  strncpy(source,&(rxMessage.c_str()[3]),2);
-  source[2] = '\0';
-  func = rxMessage.c_str()[6];
-  adr = rxMessage.c_str()[7];
-  job = rxMessage.c_str()[8];
-  l = strlen(rxMessage.c_str())-15;
-  strncpy(text,&(rxMessage.c_str()[10]),l);
-  text[l] = 0;
-  cmulti.setAlternativeNode(source);
-  cmulti.sendStandard(text,target,func,adr,job,'T');
-  cmulti.sendStandardInt(target,'R','S','0',(int32_t) rxRssi);
-  cmulti.resetNode();
+  l = strlen(rxMessage.c_str());
+  if( l>=15 )
+  {
+    strncpy(target,&(rxMessage.c_str()[1]),2);
+    target[2] = '\0';
+    strncpy(source,&(rxMessage.c_str()[3]),2);
+    source[2] = '\0';
+    func = rxMessage.c_str()[6];
+    adr = rxMessage.c_str()[7];
+    job = rxMessage.c_str()[8];
+    l-=15;
+    if(l>0)
+    {
+      strncpy(text,&(rxMessage.c_str()[10]),l);
+      text[l] = 0;
+      cmulti.setAlternativeNode(source);
+      cmulti.sendStandard(text,target,func,adr,job,'T');
+      cmulti.sendStandardInt(target,'R','S','0',(int32_t) rxRssi);
+      cmulti.resetNode();
+    }
+  }
 }
 
 void LoRa_rxMode(){
