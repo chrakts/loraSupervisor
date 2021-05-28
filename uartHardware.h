@@ -25,7 +25,31 @@
 #define USART_TXCINTLVL_0 USART_TXCINTLVL_LO_gc
 /* ###################### ########### ############################ */
 
-/* ----------------- automatische Deklarationen ---------------------- */
+/* ###################### Zweiter UART ############################ */
+#undef USE_RS485_1   // unbenutzt
+#undef  USE_RS485_FEEDBACK_1
+#define USE_BUSY_1 false
+
+#define UART_PORT_1 D
+#define UART_NUM_1  1
+#define TE_PIN_1    0
+#define RE_PIN_1    5
+#define TX_PIN_1    7
+#define RX_PIN_1    6
+#define USART_RXCINTLVL_1 USART_RXCINTLVL_LO_gc
+#define USART_TXCINTLVL_1 USART_TXCINTLVL_LO_gc
+/* ###################### ########### ############################ */
+
+/* ###################### Busy-Timer  ############################ */
+// Dieser Timer wird dann für beide Ports verwendet (Timer2 L/H -> belegt damit auch Timer 1!)
+#define BUSY_TIMER_PORT C
+/* ###################### ########### ############################ */
+
+
+/* ----------------- automatische für Busy-Timer ---------------------- */
+#define BUSY_TIMER      JOIN3( TC,BUSY_TIMER_PORT,2 )
+
+/* ----------------- automatische Deklarationen UART 0 ---------------------- */
 #define SERIAL_0 JOIN3(USART,UART_PORT_0,UART_NUM_0)
 #define SERIAL_PORT_0 JOIN(PORT,UART_PORT_0)
 #define SERIAL_TE_PIN_0 JOIN3(PIN,TE_PIN_0,_bm)
@@ -51,25 +75,9 @@
 #define Busy_Control_PinCtrl_0 JOIN3( PIN,RX_PIN_0,CTRL )
 #define Busy_Control_Port_0    SERIAL_PORT_0
 #define Busy_Control_IntVec_0  JOIN3(PORT,UART_PORT_0,_INT0_vect)
+#define Busy_Control_TimVec_0  JOIN4(TC,BUSY_TIMER_PORT,2,_LUNF_vect)
 
-
-
-/* ###################### Zweiter UART ############################ */
-#undef USE_RS485_1   // unbenutzt
-#undef  USE_RS485_FEEDBACK_1
-#define USE_BUSY_1 false
-
-#define UART_PORT_1 D
-#define UART_NUM_1  1
-#define TE_PIN_1    0
-#define RE_PIN_1    5
-#define TX_PIN_1    7
-#define RX_PIN_1    6
-#define USART_RXCINTLVL_1 USART_RXCINTLVL_LO_gc
-#define USART_TXCINTLVL_1 USART_TXCINTLVL_LO_gc
-/* ###################### ########### ############################ */
-
-/* ----------------- automatische Deklarationen ---------------------- */
+/* ----------------- automatische Deklarationen UART 1 ---------------------- */
 
 #define SERIAL_1 JOIN3(USART,UART_PORT_1,UART_NUM_1)
 #define SERIAL_PORT_1 JOIN(PORT,UART_PORT_1)
@@ -104,6 +112,7 @@
 #define Busy_Control_PinCtrl_1 JOIN3( PIN,RX_PIN_1,CTRL )
 #define Busy_Control_Port_1    SERIAL_PORT_1
 #define Busy_Control_IntVec_1  JOIN3(PORT,UART_PORT_1,_INT1_vect)
+#define Busy_Control_TimVec_1  JOIN4(TC,BUSY_TIMER_PORT,2,_HUNF_vect)
 
 
 #define UART0_RING_BUFFER_SIZE 60

@@ -42,63 +42,22 @@ void setup()
 	sei();
 	cmulti.open(Serial::BAUD_57600,F_CPU);
 
-  cmulti.sendInfo("Hello from LORA-Board","BR");
-
-  #ifdef SENDER_BUILT
-
-  cmulti.sendStandard(SECURITY_LEVEL_DEVELOPMENT_KEY,"Kg",'S','0','K','T');
-  _delay_ms(30);
-  cmulti.sendCommand("Kg",'S','0','m');
-  _delay_ms(130);
-  cmulti.sendCommand("Kg",'S','0','C');
-  _delay_ms(130);
-  cmulti.sendCommand("Kg",'S','0','T');
-  _delay_ms(130);
-  cmulti.sendCommand("Kg",'S','0','m');
-  _delay_ms(130);
-  cmulti.sendCommand("Kg",'R','0','n');
-  _delay_ms(130);
-  cmulti.sendCommand("Kg",'R','0','g');
-  _delay_ms(130);
-  cmulti.sendCommand("Kg",'D','0','A');
-  _delay_ms(130);
-
-  /*
-  cmulti.encryptSetKey(key);
-  cmulti.setEncryption();
-  cmulti.broadcastFloat(-5.245,'C','1','T');
-  _delay_ms(30);
-  cmulti.setEncryption();
-  cmulti.sendStandard("56.485,3.45","rx",'T','0','f','T');
-  _delay_ms(130);
-  cmulti.setEncryption();
-  cmulti.sendByteArray(key,16,"rx",'S','T','0','B');
-  _delay_ms(30);
-*/
-  #endif // SENDER_BUILT
-  #ifdef RECEIVER_BUILT
-  cmulti.sendStandard(SECURITY_LEVEL_DEVELOPMENT_KEY,"tx",'S','0','K','T');
-  _delay_ms(30);
-  cmulti.sendCommand("tx",'S','0','C');
-  _delay_ms(30);
-  #endif // RECEIVER_BUILT
 
 
   #ifdef SENDER_BUILT
-  //cmulti.sendStandard("LORA-Board","rx",'T','0','d','T');
+  cmulti.sendInfo("Hello from LORA-SENDER-Board","BR");
   #endif // SENDER_BUILT
   #ifdef RECEIVER_BUILT
-  cmulti.sendStandard("LORA-Board","tx",'T','0','d','T');
+  cmulti.sendInfo("Hello from LORA-RECEIVER-Board","BR");
   #endif // RECEIVER_BUILT
-
-
 
   if (!LoRa.begin(868E6))
   {
-    //Serial.println("Starting LoRa failed!");
-    //
-    LED_ROT_ON;
-    while (1);
+    while(1)
+    {
+      LED_ROT_TOGGLE;
+      _delay_ms(100);
+    }
   }
 
   RTC.PERL = 3;
@@ -109,7 +68,7 @@ void setup()
 
 
 #ifdef SENDER_BUILT
-  LoRa.onTxDone(onTxDone);
+  //LoRa.onTxDone(onTxDone);
 #endif // SENDER_BUILT
 #ifdef RECEIVER_BUILT
   LoRa.onReceive(onReceive);
@@ -125,35 +84,37 @@ int main()
 #ifdef SENDER_BUILT
   while(1)
   {
-/*
+
   // send packet
     LED_BLAU_ON;
-    PORTC.OUTCLR = PIN0_bm;
-    PORTC.OUTSET = PIN1_bm;
+    //PORTC.OUTCLR = PIN0_bm;
+    //PORTC.OUTSET = PIN1_bm;
+    loraCmulti.clearChecksum();
     loraCmulti.sendStandardInt("BR",'S','0','C',counter);
-    LoRa_sendMessage(loraCmulti.get());
-    while(txIsReady==false)
-    {}
+    LoRa_sendMessage( &(loraCmulti.get()[1]) ); // header weglassen
+    //while(txIsReady==false)
+    //{}
     counter++;
-    deInitReadMonitor();
+    LED_BLAU_OFF;
+    //deInitReadMonitor();
     LoRa.sleep();
     set_sleep_mode(SLEEP_MODE_PWR_SAVE);
     sleep_enable();
     sleep_cpu();
     sleep_disable();
-    initReadMonitor();*/
+    //initReadMonitor();
 
     cmultiRec.comStateMachine();
     cmultiRec.doJob();
+    _delay_ms(500);
   }
 #endif // SENDER_BUILT
 
 
 #ifdef RECEIVER_BUILT
-  uint32_t counter = 0;
   while(1)
   {
-  /*
+
     while(rxIsReady==false)
     {
       LED_GRUEN_OFF;
@@ -166,17 +127,11 @@ int main()
     rxIsReady=false;
     evaluate();
     _delay_ms(5);
-  */
+
 
     cmultiRec.comStateMachine();
     cmultiRec.doJob();
 
-    if(counter > 1000000)
-    {
-      cmulti.sendAnswerDouble("!!", 'X','X','X',fExternalTemperature,true);
-      counter = 0;
-    }
-    counter++;
   }
 #endif // RECEIVER_BUILT
 
@@ -188,8 +143,10 @@ char target[3],source[3],text[25];
 char func,adr,job;
 uint8_t l;
 
-  l = strlen(rxMessage.c_str());
-  if( l>=15 )
+  l = strlen(rxMessage);
+  cmulti.sendInfo(rxMessage,"BR");
+  /*
+  if( l>=10 ) // 15
   {
     strncpy(target,&(rxMessage.c_str()[1]),2);
     target[2] = '\0';
@@ -199,16 +156,19 @@ uint8_t l;
     adr = rxMessage.c_str()[7];
     job = rxMessage.c_str()[8];
     l-=15;
+    text[0] = 0;
     if(l>0)
     {
       strncpy(text,&(rxMessage.c_str()[10]),l);
       text[l] = 0;
-      cmulti.setAlternativeNode(source);
-      cmulti.sendStandard(text,target,func,adr,job,'T');
-      cmulti.sendStandardInt(target,'R','S','0',(int32_t) rxRssi);
-      cmulti.resetNode();
     }
+    //cmulti.setAlternativeNode(source);
+    cmulti.sendStandard(text,target,func,adr,job,'T');
+    cmulti.sendStandardInt(target,'R','S','0',(int32_t) rxRssi);
+    //cmulti.resetNode();
   }
+  */
+
 }
 
 void LoRa_rxMode(){
@@ -221,23 +181,27 @@ void LoRa_txMode(){
   LoRa.disableInvertIQ();               // normal mode
 }
 
-void LoRa_sendMessage(String message) {
+void LoRa_sendMessage(char *message)
+{
   txIsReady = false;
-  LoRa_txMode();                        // set tx mode
+  //LoRa_txMode();                        // set tx mode
   LoRa.beginPacket();                   // start packet
-  LoRa.print(message);                  // add payload
-  LoRa.endPacket(true);                 // finish packet and send it
+  LoRa.write((uint8_t*)message,strlen(message));                  // add payload
+  LoRa.endPacket(false);                 // finish packet and send it !!!!!!!!!!!!! war true
 }
 
-void onReceive(int packetSize) {
-  LED_GELB_ON;
-  rxMessage="";
+void onReceive(int packetSize)
+{
+  uint8_t cointer=0;
   while (LoRa.available()) {
-    rxMessage += (char)LoRa.read();
+    rxMessage[cointer] = (char)LoRa.read();
+    cointer++;
+    if (cointer>=LORAMESSAGELENGTH-1)
+      cointer--;
   }
+  rxMessage[cointer]=0;
   rxRssi = LoRa.packetRssi();
   rxIsReady=true;
-  LED_GELB_OFF;
 }
 
 void onTxDone() {

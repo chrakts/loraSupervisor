@@ -1,6 +1,7 @@
 #ifndef HX711ADAPTER_H_INCLUDED
 #define HX711ADAPTER_H_INCLUDED
 
+#define LORAMESSAGELENGTH 30
 
 #include <avr/io.h>
 #include <stdbool.h>
@@ -29,7 +30,7 @@
 void setup();
 void onTxDone();
 void onReceive(int packetSize);
-void LoRa_sendMessage(String message);
+void LoRa_sendMessage(char *message);
 void LoRa_txMode();
 void LoRa_rxMode();
 void evaluate(void);

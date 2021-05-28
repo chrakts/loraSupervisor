@@ -9,6 +9,7 @@
 #include "LoRa.h"
 #include "Cmulti2Buffer.h"
 #include "ComReceiver.h"
+#include "loraSupervisor.h"
 
 extern const char *Node;
 
@@ -39,7 +40,7 @@ extern volatile  uint8_t txIsReady;
 extern volatile  uint8_t rxIsReady;
 
 extern volatile int8_t rxRssi;
-extern  String rxMessage;
+extern  char rxMessage[LORAMESSAGELENGTH];
 
 extern uint8_t key[];
 

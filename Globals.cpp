@@ -27,13 +27,13 @@ SPI mySPI(0);
 LoRaClass LoRa(&mySPI);
 
 Communication cmulti(0,Node,5,true);
-ComReceiver cmultiRec(&cmulti,Node,cnetCommands,NUM_COMMANDS,cnetInformation,NUM_INFORMATION);
+ComReceiver cmultiRec(&cmulti,Node,cnetCommands,NUM_COMMANDS,cnetInformation,NUM_INFORMATION,NULL,NULL);
 
 volatile uint8_t txIsReady = false;
 volatile uint8_t rxIsReady = false;
 
 volatile int8_t rxRssi = 0;
-String rxMessage;
+char rxMessage[LORAMESSAGELENGTH];
 
 uint8_t key[16] = {AES256_KEY};
 
